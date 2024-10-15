@@ -40,16 +40,13 @@ app.post("/login-user", async (req, res) => {
     if (!user.varified) {
       return res.json({ error: "User is not varified" });
     }
-    if (await bycrpt.compare(password, user.password)){
-      const token = jwt.sign({ email: user.email }, process.env.JWT_SECREAT, {
-        expiresIn: 3600, //to expire the token in 3600sec
-      });
-      if (res.status(201)) {
-        return res.json({ status: "ok",data:  token });
-      } else {
-        return res.json({ error: "Error" });
-      }
-    }
+ if (await bcrypt.compare(password, user.password)) {
+  const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+    expiresIn: 3600,
+  });
+  return res.status(201).json({ status: "ok", data: token });  // Fix here
+}
+
     return res.json({ status: "error", error: "INVALID PASSWORD" });
   }
 });
