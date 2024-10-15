@@ -62,40 +62,31 @@ app.post("/userData", async (req, res) => {
     } else {
       const userId = result.data._id;
       // console.log(userId);
-      Project.findOneAndUpdate(
-        { userId: userId },
-        { $pull: { notifications: { expiredAt: { $lt: Date.now() } } } },
-        { new: true }
-      )
-      .then((x) => {
-          if (!x) {
-            // Handle the case when no document was found for the given userId
-            return res.json({
-              status: "error",
-              data: "No user found",
-              redirect: "",
-            });
-          } else {
-            // console.log(x);
-            res.json({
-              status: "ok",
-              data: {
-                userId:x.userId,
-                Fname:result.data.Fname,
-                projects: x.projects,
-                notifications: x.notifications,
-                notifCount: x.notifCount,
-              },
-            });
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          return res.json({
-            status: "error",
-            data: "Error while updating user ",
-          });
-        });
+const updatedProject = await Project.findOneAndUpdate(
+  { userId: userId },
+  { $pull: { notifications: { expiredAt: { $lt: Date.now() } } } },
+  { new: true }
+);
+
+if (!updatedProject) {
+  return res.json({
+    status: "error",
+    data: "No user found",
+    redirect: "",
+  });
+}
+
+res.json({
+  status: "ok",
+  data: {
+    userId: updatedProject.userId,
+    Fname: result.data.Fname,
+    projects: updatedProject.projects,
+    notifications: updatedProject.notifications,
+    notifCount: updatedProject.notifCount,
+  },
+});
+
     }
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
